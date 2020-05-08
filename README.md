@@ -12,6 +12,8 @@
     - Without orientation car was stumbling here and therewhile staying on road. 
     - So added orientation to acknowledge the agent to reach destiny
 - Shifted the entire update operation to car.py from brain.update()
+- removed tanh activation __to stop__ the __ghumr effect__
+- reduced the LR of the optmiser
 
 ## Detailed Summary :
 - Started solving the assignment by fixing the TD3 into asssignment 7 
@@ -26,35 +28,38 @@
     - This resulted in car trying to stay on road but unable to learn to reach the destination
     - Later decreased the reward of moving towards the destination and staying on road. This resulted in car tending more to travel on sand. 
 - Added orientation to the network by appending it to the output of the CNN layer. I havent quiet tested it thoroughly
+- Removed Tanh beliving that tanh is pushing the output to extrimities of rotating angle
+- Tried reduced learning rate coefficient of the optmizer.
 
 Most of my time was consumed in merging the TD3 into assignment7. I did not get much time play with different hyper parameters or Think more about what more features can i add to actions and states parameters so that model can train better. 
 
-I would like to try following things if i got extension for assignment:
-- Right now done condition is set to true if the car travels 10-20 steps on sand. I will change the done condition so that car can learn how to get back on road even it is lost
-- Figure out the temperature parameter and its significance and try implement it in assignment 10
-- Add the distance as a state parameter to the network
-- Right now i am making the done = True after evern N number of steps. Remove that done condition and observe the results
-- Rethink what all the parameter can used as actions , what all the parameters can be sent to state and restructure reward system for better performance
-- Increase the number of initial steps and train
-- Make padding At the border of the image
+## Parameters and done condition :
+
+
+
+## I will try the following in the future:
+- After listening to @prateeks clues on group. I have implemented the learning in 2 phases
+- Please take a look at the __two-phase-learning__ ___branch in this repository___. 
+    - You can find the code for two-phase-learning [here](). Along with the instructions for running the program. 
+- I am trying to execute the entire program in two phases. where in phase one agent learns to travel across destinations while in phase 2 it learns to stay on roads while travelling along destinations
+- [this]() is how the implementation looks like
+![two-phase-training](image_pres/training_flow.png)
+- I am trying to solve the problem in [this]() way now. Hope it leads me to solution.
+
 
 I believe that trying these things out will defenitely open gates for new ideas and intutions and Improve the model further
 
 
 
-## Observations
-- After training with this code car was able to understand how to keep itself on roads. But was unable to learn how to reach destiny. This is the major thing i need to focus on.
 
 
 
 
-
-__Refer__ [this](https://youtu.be/2h8b4orhTT4) link to see some video of how car was training.
+__Refer__ [this](https://youtu.be/A6wUZMdBIzE) link to see some video of how car was training.
 - These are some small instances of recording while the model was training.
-- It can be clearly observed that the model is trying to stay on road while not very confident about reaching the destination
+- It can be clearly observed that the model is trying to reach the destination. but unable to stay on roads
 
-__NOTE__ : I have recorded the video before removing the sensor image (dots infront of car) .Apologies for that\
-__NOTE__ : I still kept some of the old code commented without deleting. So that reader can find it easy to correlate the old code with the new one\
+
 __NOTE__ : I dont have GPU so I was unable to do much hyper parameter tuning
  
  ### New Actor model
