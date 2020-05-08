@@ -37,11 +37,11 @@ Config.set('graphics', 'height', '660')
 
 # model parameters START
 seed = 0 # Random seed number
-start_timesteps = 1e2 # Number of iterations/timesteps before which the model randomly chooses an action, and after which it starts to use the policy network
+start_timesteps = 9e2 # Number of iterations/timesteps before which the model randomly chooses an action, and after which it starts to use the policy network
 eval_freq = 5e2 # How often the evaluation step is performed (after how many timesteps)
 #max_timesteps = 5e5 # Total number of iterations/timesteps
 save_models = True # Boolean checker whether or not to save the pre-trained model
-expl_noise = 0.1 # Exploration noise - STD value of exploration Gaussian noise
+expl_noise = 1.0 # Exploration noise - STD value of exploration Gaussian noise
 batch_size = 30 # Size of the batch
 discount = 0.99 # Discount factor gamma, used in the calculation of the total discounted reward
 tau = 0.005 # Target network update rate
@@ -54,6 +54,7 @@ timesteps_since_eval = 0
 episode_num = 0
 episode_reward = 0
 episode_timesteps = 0
+reached_dest = 0
 
 action_len = 1
 state_len = 5
@@ -93,7 +94,7 @@ def save_cropped_image(img, x, y, name = ""):
     # im.save("./check/"+name+ "_" + "your_file"+str(x) +"_"+ str(y) +".png")
     return
 
-def get_target_image(img, angle, center, size, fill_with = 255):
+def get_target_image(img, angle, center, size, fill_with = 100.0):
     angle = angle + 90
     center[0] -= 0
     img = np.pad(img, size, 'constant', constant_values = fill_with)
@@ -182,8 +183,8 @@ class Game(Widget):
     ball3 = ObjectProperty(None)
 
     def serve_car(self):
-        #my_rand_points = [((715, 360),0),((348,414),90),((127,350),95),((581,432),270),((882,71),20),((970,278),0)]
-        my_rand_points = [((715, 360),0)]
+        my_rand_points = [((715, 360),0),((348,414),90),((127,350),95),((581,432),270),((882,71),20),((970,278),0)]
+        #my_rand_points = [((715, 360),0)]
         (x,y),angle = random.choice(my_rand_points)
         self.car.center = (x,y)
         self.car.angle = angle
@@ -234,7 +235,7 @@ class Game(Widget):
         global episode_timesteps
         global main_img
         global image_size
-
+        global reached_dest
         global last_time_steps
         # NEW GLOBALS
 
@@ -280,14 +281,16 @@ class Game(Widget):
             # state calculation
 
             #cnn state calculation
-            self.serve_car()
-            _,_,obs = get_target_image(main_img, self.car.angle, [self.car.x, self.car.y], image_size)
-            save_cropped_image(obs, self.car.x, self.car.y, name = "initial")
+#            if (episode_timesteps-1)%3000 != 0
+            if  not  reached_dest:
+                self.serve_car()
+                _,_,obs = get_target_image(main_img, self.car.angle, [self.car.x, self.car.y], image_size)
+                save_cropped_image(obs, self.car.x, self.car.y, name = "initial")
 
-            xx = goal_x - self.car.x
-            yy = goal_y - self.car.y
-            orientation = Vector(*self.car.velocity).angle((xx,yy))/180.
-            orientation = [orientation, -orientation]
+                xx = goal_x - self.car.x
+                yy = goal_y - self.car.y
+                orientation = Vector(*self.car.velocity).angle((xx,yy))/180.
+                orientation = [orientation, -orientation]
 
             #cnn state calculation
 
@@ -300,6 +303,7 @@ class Game(Widget):
             episode_reward = 0
             episode_timesteps = 0
             episode_num += 1
+            reached_dest = 0
 
           # Before 10000 timesteps, we play random actions
           if total_timesteps < start_timesteps:
@@ -326,35 +330,54 @@ class Game(Widget):
           # self.ball3.pos = self.car.sensor3
 
           if sand[int(self.car.x),int(self.car.y)] > 0:
-              self.car.velocity = Vector(0.5, 0).rotate(self.car.angle)
+              self.car.velocity = Vector(1, 0).rotate(self.car.angle)
               #print(1, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
 
               reward = -1
+              if distance < last_distance:
+                reward = -1.2
           else: # otherwise
               self.car.velocity = Vector(2, 0).rotate(self.car.angle)
-              reward = 0.3
+              reward = -0.2
               #print(0, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
               if distance < last_distance:
-                  reward = 0.42
+                  reward = 0.1
               # else:
               #     last_reward = last_reward +(-0.2)
 
 
 
           if self.car.x < 5:
+              reward_window.append(-3)
               self.car.x = 5
               reward = -1
+          elif self.car.x < 10:
+              reward = -1# * (10-self.car.x)
+              
           if self.car.x > self.width - 5:
+              reward_window.append(-3)
               self.car.x = self.width - 5
-              reward = -1
+              reward = -0.7
+          elif self.car.x > self.width - 10:
+              reward = -0.1 * (self.car.x- self.width +10)
+              
           if self.car.y < 5:
+              reward_window.append(-3)
               self.car.y = 5
               reward = -1
+          elif self.car.y < 10:
+              reward = -1# * (10-self.car.y)
+              
           if self.car.y > self.height - 5:
+              reward_window.append(-3)
               self.car.y = self.height - 5
               reward = -1
+          elif self.car.y > self.height - 10:
+              reward = -1# * (self.car.y- self.height+10)
 
           if distance < 25:
+              done = True
+              reached_dest = 1
               if swap == 1:
                   goal_x = 1420
                   goal_y = 622
@@ -363,7 +386,7 @@ class Game(Widget):
                   goal_x = 9
                   goal_y = 85
                   swap = 1
-              reward = 5
+              reward = 2
           last_distance = distance
 
           # cnn state calculation
@@ -384,7 +407,7 @@ class Game(Widget):
 
           reward_window.append(reward)
 
-          if sum(reward_window[len(reward_window)-40:]) <= -38 or episode_timesteps % 2500 == 0 and episode_timesteps != 0:
+          if sum(reward_window[len(reward_window)-100:]) <= -188 or episode_timesteps % 1200 == 0 and episode_timesteps != 0:
               done = True
               reward_window = []
 

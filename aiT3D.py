@@ -14,7 +14,7 @@ from collections import deque
 # Implementing Experience Replay
 class ReplayBuffer(object):
 
-  def __init__(self, max_size=6e2):
+  def __init__(self, max_size=2e3):
     self.storage = []
     self.max_size = max_size
     self.ptr = 0
@@ -114,7 +114,10 @@ class Actor(nn.Module):
     x = torch.cat([x, o], 1)
     x = F.relu(self.layer_1(x))
     x = F.relu(self.layer_2(x))
-    x = self.max_action * torch.tanh(self.layer_3(x))
+#    x = self.layer_1(x)
+#    x = self.layer_2(x)
+    x = self.layer_3(x)
+#    x = self.max_action * torch.tanh(self.layer_3(x))
     return x
 
 
