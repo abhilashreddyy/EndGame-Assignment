@@ -9,6 +9,7 @@ import time
 # Importing the Kivy packages
 from kivy.app import App
 from kivy.uix.widget import Widget
+from kivy.uix.image import Image
 from kivy.uix.button import Button
 from kivy.graphics import Color, Ellipse, Line
 from kivy.config import Config
@@ -24,7 +25,7 @@ from aiT3D import TD3, ReplayBuffer
 import random
 import cv2
 from scipy import ndimage
-from PIL import Image
+#from PIL import Image
 import scipy
 
 
@@ -183,8 +184,8 @@ class Game(Widget):
     ball3 = ObjectProperty(None)
 
     def serve_car(self):
-        my_rand_points = [((715, 360),0),((348,414),90),((127,350),95),((581,432),270),((882,71),20),((970,278),0)]
-        #my_rand_points = [((715, 360),0)]
+        #my_rand_points = [((715, 360),0),((348,414),90),((127,350),95),((581,432),270),((882,71),20),((970,278),0)]
+        my_rand_points = [((715, 360),0)]
         (x,y),angle = random.choice(my_rand_points)
         self.car.center = (x,y)
         self.car.angle = angle
@@ -333,12 +334,12 @@ class Game(Widget):
               self.car.velocity = Vector(1, 0).rotate(self.car.angle)
               #print(1, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
 
-              reward = -1
+              reward = -0.5
               if distance < last_distance:
-                reward = -1.2
+                reward = -0.2
           else: # otherwise
               self.car.velocity = Vector(2, 0).rotate(self.car.angle)
-              reward = -0.2
+              reward = -0.24
               #print(0, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
               if distance < last_distance:
                   reward = 0.1
@@ -353,21 +354,21 @@ class Game(Widget):
               reward = -1
           elif self.car.x < 10:
               reward = -1# * (10-self.car.x)
-              
+
           if self.car.x > self.width - 5:
               reward_window.append(-3)
               self.car.x = self.width - 5
               reward = -0.7
           elif self.car.x > self.width - 10:
               reward = -0.1 * (self.car.x- self.width +10)
-              
+
           if self.car.y < 5:
               reward_window.append(-3)
               self.car.y = 5
               reward = -1
           elif self.car.y < 10:
               reward = -1# * (10-self.car.y)
-              
+
           if self.car.y > self.height - 5:
               reward_window.append(-3)
               self.car.y = self.height - 5
@@ -545,10 +546,14 @@ class CarApp(App):
         clearbtn.bind(on_release = self.clear_canvas)
         savebtn.bind(on_release = self.save)
         loadbtn.bind(on_release = self.load)
+        marker_home = Image(source = "./images/home.jpg", pos = (1340,582))
+        marker_offce = Image(source = "./images/office.jpg", pos = (9,85))
         parent.add_widget(self.painter)
         parent.add_widget(clearbtn)
         parent.add_widget(savebtn)
         parent.add_widget(loadbtn)
+        parent.add_widget(marker_home)
+        parent.add_widget(marker_offce)
         return parent
 
     def clear_canvas(self, obj):
