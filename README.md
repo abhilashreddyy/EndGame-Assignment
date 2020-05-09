@@ -16,6 +16,8 @@ __Note__ :  please checkout the __two-phase-learning__ branch of this repository
 - removed tanh activation __to stop__ the __ghumr effect__
 - reduced the LR of the optmiser
 
+__Note__ : Refer [this](https://youtu.be/A6wUZMdBIzE) link to see video of how car was training.
+
 ## Detailed explanation :
 - Started solving the assignment by fixing the TD3 into asssignment 7 
     - Initially, Implemented the update function in the ai.py module
