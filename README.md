@@ -16,7 +16,7 @@ __Note__ :  please checkout the __two-phase-learning__ branch of this repository
 - removed tanh activation __to stop__ the __ghumr effect__
 - reduced the LR of the optmiser
 
-__Note__ : Refer [this](https://youtu.be/A6wUZMdBIzE) link to see video of how car was training.
+__Note__ : Refer [this](https://youtu.be/A6wUZMdBIzE) link to see video of how car was training. Top right and bottom left corners are two destinations. Same as assignment 7. Now in inference I have placed icons at source and destination.
 
 ## Inference
 - To run the trained model use
