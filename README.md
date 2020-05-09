@@ -24,7 +24,7 @@ __Note__ : Refer [this](https://youtu.be/A6wUZMdBIzE) link to see video of how c
 python inference.py
 ```
 - And then Load the model
-- __NOTE__ : I have trainied a good model but because of some technical issues in the final moment I failed to either record it or save the model. But if you run this model you can clearly see that the model is trying to stay on roads while moving towards destination. But the current model can get trained better with more computation.
+- __NOTE__ : I have trainied a better model but failed to save the model. But if you run this model you can clearly see that the model is trying to stay on roads while moving towards destination. But the current model can get trained better with more computation.
 
 ## Detailed explanation :
 - Started solving the assignment by fixing the TD3 into asssignment 7 
