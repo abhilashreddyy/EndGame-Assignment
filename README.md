@@ -4,7 +4,7 @@
 
 ## Training self driving car on TD3 deep reinforcement learning algorithm 
 
-__Note__ :  please checkout the __two-phase-learning__ branch of the repository [here](https://github.com/abhilashreddyy/EndGame-Assignment/tree/two-phase-learning). where i have written __different version of the implementation__ _with detailed documentataion_
+__Note__ :  please checkout the __two-phase-learning__ branch of this repository [here](https://github.com/abhilashreddyy/EndGame-Assignment/tree/two-phase-learning). where i have written __different version of the implementation__ _with detailed documentataion_
 ## Summary of what is done 
 - Added CNN to calculate state from image
     - replaced the sensor input with cropped & rotated Image input
