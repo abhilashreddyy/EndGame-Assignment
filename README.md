@@ -31,6 +31,8 @@ __Note__ :  please checkout the __two-phase-learning__ branch of this repository
 - Added orientation to the network by appending it to the output of the CNN layer. I havent quiet tested it thoroughly
 - Removed Tanh beliving that tanh is pushing the output to extrimities of rotating angle
 - Tried reduced learning rate coefficient of the optmizer.
+- removed tanh activation __to stop__ the __ghumr effect__
+- reduced the LR of the optmiser
 
 Most of my time was consumed in merging the TD3 into assignment7. I did not get much time play with different hyper parameters or Think more about what more features can i add to actions and states parameters so that model can train better. 
 
