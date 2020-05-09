@@ -31,8 +31,8 @@ import scipy
 # Adding this line if we don't want the right click to put a red point
 Config.set('input', 'mouse', 'mouse,multitouch_on_demand')
 Config.set('graphics', 'resizable', False)
-Config.set('graphics', 'width', '1429')
-Config.set('graphics', 'height', '660')
+Config.set('graphics', 'width', '1509')
+Config.set('graphics', 'height', '740')
 
 
 # model parameters START
@@ -82,8 +82,8 @@ action2rotation = [0,5,-5]
 reward = 0
 scores = []
 reward_window = []
-im = CoreImage("./images/MASK1.png")
-main_img = cv2.imread('./images/mask.png',0)
+im = CoreImage("./images/MASK1_white.png")
+main_img = cv2.imread('./images/mask_white.png',0)
 
 # textureMask = CoreImage(source="./kivytest/simplemask1.png")
 def save_cropped_image(img, x, y, name = ""):
@@ -99,16 +99,12 @@ def get_target_image(img, angle, center, size, fill_with = 100.0):
     center[0] -= 0
     img = np.pad(img, size, 'constant', constant_values = fill_with)
     init_size = 1.6*size
-    #print(img.shape)
     center[0] += size
     center[1] += size
-    #print(int(center[0]-(init_size/2)) , int(center[1]-(init_size/2)),int(center[0]+(init_size/2)) , int(center[1]+(init_size/2)))
     cropped = img[int(center[0]-(init_size/2)) : int(center[0]+(init_size/2)) ,int(center[1]-(init_size/2)): int(center[1]+(init_size/2))]
-    #return cropped
     rotated = ndimage.rotate(cropped, angle, reshape = False, cval = 255.0)
     y,x = rotated.shape
     final = rotated[int(y/2-(size/2)):int(y/2+(size/2)),int(x/2-(size/2)):int(x/2+(size/2))]
-    #print(rotated.shape)
     return cropped, rotated, final
 
 
@@ -120,10 +116,10 @@ def init():
     global goal_y
     global first_update
     sand = np.zeros((longueur,largeur))
-    img = PILImage.open("./images/mask.png").convert('L')
+    img = PILImage.open("./images/mask_white.png").convert('L')
     sand = np.asarray(img)/255
-    goal_x = 1420
-    goal_y = 622
+    goal_x = 1460
+    goal_y = 662
     first_update = False
     global swap
     swap = 0
@@ -158,19 +154,7 @@ class Car(Widget):
         self.pos = Vector(*self.velocity) + self.pos
         self.rotation = rotation
         self.angle = self.angle + self.rotation
-        #self.sensor1 = Vector(30, 0).rotate(self.angle) + self.pos
-        #self.sensor2 = Vector(30, 0).rotate((self.angle+30)%360) + self.pos
-        #self.sensor3 = Vector(30, 0).rotate((self.angle-30)%360) + self.pos
-        #self.signal1 = int(np.sum(sand[int(self.sensor1_x)-10:int(self.sensor1_x)+10, int(self.sensor1_y)-10:int(self.sensor1_y)+10]))/400.
-        #self.signal2 = int(np.sum(sand[int(self.sensor2_x)-10:int(self.sensor2_x)+10, int(self.sensor2_y)-10:int(self.sensor2_y)+10]))/400.
-        #self.signal3 = int(np.sum(sand[int(self.sensor3_x)-10:int(self.sensor3_x)+10, int(self.sensor3_y)-10:int(self.sensor3_y)+10]))/400.
-        # if self.sensor1_x>longueur-10 or self.sensor1_x<10 or self.sensor1_y>largeur-10 or self.sensor1_y<10:
-        #     self.signal1 = 10.
-        # if self.sensor2_x>longueur-10 or self.sensor2_x<10 or self.sensor2_y>largeur-10 or self.sensor2_y<10:
-        #     self.signal2 = 10.
-        # if self.sensor3_x>longueur-10 or self.sensor3_x<10 or self.sensor3_y>largeur-10 or self.sensor3_y<10:
-        #     self.signal3 = 10.
-        #
+
 
 
 # Creating the game class
@@ -183,16 +167,13 @@ class Game(Widget):
     ball3 = ObjectProperty(None)
 
     def serve_car(self):
-        my_rand_points = [((715, 360),0),((348,414),90),((127,350),95),((581,432),270),((882,71),20),((970,278),0)]
-        #my_rand_points = [((715, 360),0)]
+#        my_rand_points = [((715, 360),0),((348,414),90),((127,350),95),((581,432),270),((882,71),20),((970,278),0)]
+        my_rand_points = [((755, 400),0)]
         (x,y),angle = random.choice(my_rand_points)
         self.car.center = (x,y)
         self.car.angle = angle
-        #self.car.center = (715, 360)
-        #self.car.angle = 0
         self.car.velocity = Vector(4, 0)
-        # self.car.center = self.center
-        # self.car.velocity = Vector(6, 0)
+
 
     def update(self, dt):
 
@@ -264,26 +245,13 @@ class Game(Widget):
               brain.train(replay_buffer, episode_timesteps, batch_size, discount, tau, policy_noise, noise_clip, policy_freq)
               last_time_steps = total_timesteps
 
-            # We evaluate the episode and we save the policy
-            # WILL COME TO THIS LATER
-            # if timesteps_since_eval >= eval_freq:
-            #   timesteps_since_eval %= eval_freq
-            #   evaluations.append(evaluate_policy(policy))
-            #   policy.save(file_name, directory="./pytorch_models")
-            #   np.save("./results/%s" % (file_name), evaluations)
 
-            # state calculation
-            # self.serve_car()
-            # xx = goal_x - self.car.x
-            # yy = goal_y - self.car.y
-            # orientation = Vector(*self.car.velocity).angle((xx,yy))/180.
-            # obs = [self.car.signal1, self.car.signal2, self.car.signal3, orientation, -orientation]
-            # state calculation
 
-            #cnn state calculation
-#            if (episode_timesteps-1)%3000 != 0
+            # if the agent have not reached destination and collided to walls then reinitialise the agent at a given point
             if  not  reached_dest:
+                # initialize the car at new point
                 self.serve_car()
+                #cnn state calculation
                 _,_,obs = get_target_image(main_img, self.car.angle, [self.car.x, self.car.y], image_size)
                 save_cropped_image(obs, self.car.x, self.car.y, name = "initial")
 
@@ -291,11 +259,8 @@ class Game(Widget):
                 yy = goal_y - self.car.y
                 orientation = Vector(*self.car.velocity).angle((xx,yy))/180.
                 orientation = [orientation, -orientation]
+                #cnn state calculation
 
-            #cnn state calculation
-
-            # When the training step is done, we reset the state of the environment
-            # obs = env.reset()
 
             # Set the Done to False
             done = False
@@ -305,11 +270,11 @@ class Game(Widget):
             episode_num += 1
             reached_dest = 0
 
-          # Before 10000 timesteps, we play random actions
+          # Before start_timesteps , we play random actions
           if total_timesteps < start_timesteps:
             action = [random.uniform(-max_action_agent * 1.0, max_action_agent * 1.0)]
             #action = env.action_space.sample()
-          else: # After 10000 timesteps, we switch to the model
+          else: # After start_timesteps, we switch to the model
             action = brain.select_action(np.array(obs), np.array(orientation))
             # If the explore_noise parameter is not 0, we add noise to the action and we clip it
             if expl_noise != 0:
@@ -320,18 +285,13 @@ class Game(Widget):
 
           # ENV STEP PERFORM START
           if type(action) != type([]):
-              #print("action : ",type(action.tolist()[0]), type(action[0]))
               self.car.move(action.tolist()[0])
           else:
               self.car.move(action[0])
           distance = np.sqrt((self.car.x - goal_x)**2 + (self.car.y - goal_y)**2)
-          # self.ball1.pos = self.car.sensor1
-          # self.ball2.pos = self.car.sensor2
-          # self.ball3.pos = self.car.sensor3
 
           if sand[int(self.car.x),int(self.car.y)] > 0:
-              self.car.velocity = Vector(1, 0).rotate(self.car.angle)
-              #print(1, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
+              self.car.velocity = Vector(0.5, 0).rotate(self.car.angle)
 
               reward = -1
               if distance < last_distance:
@@ -339,7 +299,6 @@ class Game(Widget):
           else: # otherwise
               self.car.velocity = Vector(2, 0).rotate(self.car.angle)
               reward = -0.2
-              #print(0, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
               if distance < last_distance:
                   reward = 0.1
               # else:
@@ -347,44 +306,44 @@ class Game(Widget):
 
 
 
-          if self.car.x < 5:
+          if self.car.x < 40:
               reward_window.append(-3)
-              self.car.x = 5
+              self.car.x = 40
               reward = -1
-          elif self.car.x < 10:
-              reward = -1# * (10-self.car.x)
-              
-          if self.car.x > self.width - 5:
+#          elif self.car.x < 10:
+#              reward = -1# * (10-self.car.x)
+
+          if self.car.x > self.width - 40:
               reward_window.append(-3)
-              self.car.x = self.width - 5
-              reward = -0.7
-          elif self.car.x > self.width - 10:
-              reward = -0.1 * (self.car.x- self.width +10)
-              
-          if self.car.y < 5:
-              reward_window.append(-3)
-              self.car.y = 5
+              self.car.x = self.width - 40
               reward = -1
-          elif self.car.y < 10:
-              reward = -1# * (10-self.car.y)
-              
-          if self.car.y > self.height - 5:
+#          elif self.car.x > self.width - 10:
+#              reward = -0.1 * (self.car.x- self.width +10)
+
+          if self.car.y < 40:
               reward_window.append(-3)
-              self.car.y = self.height - 5
+              self.car.y = 40
               reward = -1
-          elif self.car.y > self.height - 10:
-              reward = -1# * (self.car.y- self.height+10)
+#          elif self.car.y < 10:
+#              reward = -1# * (10-self.car.y)
+
+          if self.car.y > self.height - 40:
+              reward_window.append(-3)
+              self.car.y = self.height - 40
+              reward = -1
+#          elif self.car.y > self.height - 10:
+#              reward = -1# * (self.car.y- self.height+10)
 
           if distance < 25:
               done = True
               reached_dest = 1
               if swap == 1:
-                  goal_x = 1420
-                  goal_y = 622
+                  goal_x = 1460
+                  goal_y = 662
                   swap = 0
               else:
-                  goal_x = 9
-                  goal_y = 85
+                  goal_x = 49
+                  goal_y = 125
                   swap = 1
               reward = 2
           last_distance = distance
@@ -398,13 +357,6 @@ class Game(Widget):
           save_cropped_image(new_obs, self.car.x, self.car.y, name = "")
           # cnn state calculation
 
-          # state calculation
-          # xx = goal_x - self.car.x
-          # yy = goal_y - self.car.y
-          # orientation = Vector(*self.car.velocity).angle((xx,yy))/180.
-          # new_obs = [self.car.signal1, self.car.signal2, self.car.signal3, orientation, -orientation]
-          # state calculation
-
           reward_window.append(reward)
 
           if sum(reward_window[len(reward_window)-100:]) <= -188 or episode_timesteps % 1200 == 0 and episode_timesteps != 0:
@@ -413,13 +365,6 @@ class Game(Widget):
 
 
           # ENV STEP PERFORM END
-
-         # new_obs, reward, done, _ = env.step(action)
-
-
-
-          # We check if the episode is done
-          #done_bool = 0 if episode_timesteps + 1 == env._max_episode_steps else float(done)
 
           # We increase the total reward
           episode_reward += reward
@@ -437,64 +382,6 @@ class Game(Widget):
 
 
 
-
-
-
-
-
-
-
-
-        # xx = goal_x - self.car.x
-        # yy = goal_y - self.car.y
-        # orientation = Vector(*self.car.velocity).angle((xx,yy))/180.
-        # last_signal = [self.car.signal1, self.car.signal2, self.car.signal3, orientation, -orientation]
-        # action = brain.update(last_reward, last_signal)
-        # scores.append(brain.score())
-        # rotation = action2rotation[action]
-        # self.car.move(rotation)
-        # distance = np.sqrt((self.car.x - goal_x)**2 + (self.car.y - goal_y)**2)
-        # self.ball1.pos = self.car.sensor1
-        # self.ball2.pos = self.car.sensor2
-        # self.ball3.pos = self.car.sensor3
-        #
-        # if sand[int(self.car.x),int(self.car.y)] > 0:
-        #     self.car.velocity = Vector(0.5, 0).rotate(self.car.angle)
-        #     print(1, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
-        #
-        #     last_reward = -1
-        # else: # otherwise
-        #     self.car.velocity = Vector(2, 0).rotate(self.car.angle)
-        #     last_reward = -0.2
-        #     print(0, goal_x, goal_y, distance, int(self.car.x),int(self.car.y), im.read_pixel(int(self.car.x),int(self.car.y)))
-        #     if distance < last_distance:
-        #         last_reward = 0.1
-        #     # else:
-        #     #     last_reward = last_reward +(-0.2)
-        #
-        # if self.car.x < 5:
-        #     self.car.x = 5
-        #     last_reward = -1
-        # if self.car.x > self.width - 5:
-        #     self.car.x = self.width - 5
-        #     last_reward = -1
-        # if self.car.y < 5:
-        #     self.car.y = 5
-        #     last_reward = -1
-        # if self.car.y > self.height - 5:
-        #     self.car.y = self.height - 5
-        #     last_reward = -1
-        #
-        # if distance < 25:
-        #     if swap == 1:
-        #         goal_x = 1420
-        #         goal_y = 622
-        #         swap = 0
-        #     else:
-        #         goal_x = 9
-        #         goal_y = 85
-        #         swap = 1
-        # last_distance = distance
 
 # Adding the painting tools
 
@@ -539,16 +426,19 @@ class CarApp(App):
         parent.serve_car()
         Clock.schedule_interval(parent.update, 1.0/60.0)
         self.painter = MyPaintWidget()
-        clearbtn = Button(text = 'clear')
-        savebtn = Button(text = 'save', pos = (parent.width, 0))
-        loadbtn = Button(text = 'load', pos = (2 * parent.width, 0))
+        clearbtn = Button(text = 'clear', size = (30,30))
+        savebtn = Button(text = 'save', pos = (parent.width, 0), size = (30,30))
+        loadbtn = Button(text = 'load', pos = (2 * parent.width, 0), size = (30,30))
+        addbtn = Button(text = "add", pos = (3*parent.width,0), size = (30,30))
         clearbtn.bind(on_release = self.clear_canvas)
         savebtn.bind(on_release = self.save)
         loadbtn.bind(on_release = self.load)
+        addbtn.bind(on_release = self.addroad)
         parent.add_widget(self.painter)
         parent.add_widget(clearbtn)
         parent.add_widget(savebtn)
         parent.add_widget(loadbtn)
+        parent.add_widget(addbtn)
         return parent
 
     def clear_canvas(self, obj):
@@ -565,6 +455,20 @@ class CarApp(App):
     def load(self, obj):
         print("loading last saved brain...")
         brain.load()
+
+    # this button adds roads to the environment
+    def addroad(self,obj):
+        print("adding roads to the environment...")
+        global im
+        global main_img
+        global sand
+        # load masks with roads
+        im = CoreImage("./images/MASK1.png")
+        main_img = cv2.imread('./images/mask.png',0)
+        sand = np.zeros((longueur,largeur))
+        img = PILImage.open("./images/mask.png").convert('L')
+        sand = np.asarray(img)/255
+        print("sucessfully added  roads")
 
 # Running the whole thing
 if __name__ == '__main__':
