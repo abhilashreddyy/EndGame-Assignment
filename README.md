@@ -47,6 +47,20 @@ python inference.py
 Most of my time was consumed in merging the TD3 into assignment7. I did not get much time play with different hyper parameters or Think more about what more features can i add to actions and states parameters so that model can train better. 
 
 ## Parameters and done condition :
+- image size : 60x60
+- done 
+    - collides the walls : -1
+    - reaches the destination : 2
+    - move on sand & go away from destination : -0.5
+    - move on sand & go towards destination : -0.2
+    - move on road & go away from destination : -0.24
+        - __meaning that moving towards destination is more important than staying on road__
+        - __this essentially helps to stop ghumr effect in long training__
+    - move on road & go towards the destination : 0.1
+- batch size : 30
+- buffer capacity : 2000
+- start time steps before using model to predict action : 900
+- These are some key parameters i have used
 
 
 
