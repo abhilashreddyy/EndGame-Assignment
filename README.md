@@ -3,65 +3,48 @@
 ## Implementation of self driving car using TD3 algorithm
 
 # Training self driving car on TD3 deep reinforcement learning algorithm 
+I have divided entire training of agent into 2 phases
+- phase 1
+    - train the car without roads so that it can learn to move across targets
+- phase 2
+    - once it starts moving across targets add roads to the environment. now agent will try to figure out how to move on roads 
 
 ## Summary of what is done 
-- Added CNN to calculate state from image
-    - replaced the sensor input with cropped & rotated Image input
-- Inputting the orientation of the car to neural network
-    - __NOTE__ : Please refer to Actor and Critic Images to understand better
-    - Without orientation car was stumbling here and therewhile staying on road. 
-    - So added orientation to acknowledge the agent to reach destiny
-- Shifted the entire update operation to car.py from brain.update()
-- removed tanh activation __to stop__ the __ghumr effect__
-- reduced the LR of the optmiser
+- This notebook mainly consists of changes required for two-phase-learning
+- This can be effectively described as the following figure
+![trainig](image_pres/training_flow.png)
+- Added padding to the images. For making the concept of walls more concrete to the agent
 
-## Detailed Summary :
-- Started solving the assignment by fixing the TD3 into asssignment 7 
-    - Initially, Implemented the update function in the ai.py module
-    - Then i messed up some part in collecting the last state and rewards (___Realising this had consumed a lot of time___). I tried to restructure the entire update function and write my custom update function in TD3 class from what i have understood. But I dont know for some reason it was not working quiet well. Car was always rotating around itself
-    - After that, restructured the entire code again and shifted the update function into car.py update function
-- Then added done condition to the code. 
-- Now the car was able to go straight on road but was unable to take turns.
-    - To solve this i have tried to increase exploration coefficient(__expl_noise__) and changed the different shapes of output channels in CNN layer. This had resulted in some exploration of car .But notthing significant
-- Then i have tried to play with the rewards
-    - Incresased the reward for living and going away from targetfrom -0.2 to 0.2
-    - This resulted in car trying to stay on road but unable to learn to reach the destination
-    - Later decreased the reward of moving towards the destination and staying on road. This resulted in car tending more to travel on sand. 
-- Added orientation to the network by appending it to the output of the CNN layer. I havent quiet tested it thoroughly
-- Removed Tanh beliving that tanh is pushing the output to extrimities of rotating angle
-- Tried reduced learning rate coefficient of the optmizer.
 
-Most of my time was consumed in merging the TD3 into assignment7. I did not get much time play with different hyper parameters or Think more about what more features can i add to actions and states parameters so that model can train better. 
-
-## Parameters and done condition :
-
+## Detailed explanation :
+- divided images into two parts for two phases of learning. Images can be founf in __images/__ folder
+- For phase 1 i have removed roads below
+![white mask](images/MASK1_white.png)
+- you can see that all the image is road and the agent can roam anywhere and the border is white which give a negative reward if gone too close to walls also done condition is set
+- Did same thing for mask_white.png
+- "\_white" at the end of image refers to thre are no roads in the image
+- for phase 2 I have added roads and converted the area with buildings and water into grey 
+    - Did this in order to set differentiation between Buildings and walls
+    - In simple terms white means cannot go at all -> grey means should not go but can learn not to go -> black means can go 
+ ![mask](images/MASK1.png)
+ - did the same for mask.png
+ - finally added padding to the city.png
+ ![city](images/citymap.png)
+ - __NOTE__ : _white border may not be visible_ on the images because the background of website is also white
+ - All these images can be gnerate by running ___white_image_save.py___. Makse sure you have original images on assignment 7 in the images folder before running ___white_image_save.py___
+ 
+- Once this is done start training by running __map.py__. 
+- Once the agent lern to move across the targets click on add button on the UI. This adds roads to the environment
+![ui click](images/ui_click.jpg)
+- Look at the below diagram to again. It will summarise the entire process
+![trainig](image_pres/training_flow.png)
 
 
 ## I will try the following in the future:
-- After listening to @prateeks clues on group. I have implemented the learning in 2 phases
-- Please take a look at the __two-phase-learning__ ___branch in this repository___. 
-    - You can find the code for two-phase-learning [here](). Along with the instructions for running the program. 
-- I am trying to execute the entire program in two phases. where in phase one agent learns to travel across destinations while in phase 2 it learns to stay on roads while travelling along destinations
-- [this]() is how the implementation looks like
-![two-phase-training](image_pres/training_flow.png)
-- I am trying to solve the problem in [this]() way now. Hope it leads me to solution.
-
+- will try to improve the phase-2 of learning
 
 I believe that trying these things out will defenitely open gates for new ideas and intutions and Improve the model further
 
-
-
-
-
-
-
-__Refer__ [this](https://youtu.be/A6wUZMdBIzE) link to see some video of how car was training.
-- These are some small instances of recording while the model was training.
-- It can be clearly observed that the model is trying to reach the destination. but unable to stay on roads
-
-
-__NOTE__ : I dont have GPU so I was unable to do much hyper parameter tuning
- 
  ### New Actor model
  ![actor](image_pres/final_actor.jpg)
  
