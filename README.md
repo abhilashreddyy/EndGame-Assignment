@@ -1,6 +1,4 @@
-# EndGame-Assignment
-
-## Implementation of self driving car using TD3 algorithm
+# Implementation of self driving car using TD3 algorithm
 
 ## Training self driving car on TD3 deep reinforcement learning algorithm 
 
